@@ -1,0 +1,68 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: ReferralController
+    source:
+      abi: ReferralController
+      address: "0x22E7F559bE09B6A758F02A84dDC64f45642206a1"
+      startBlock: 24890311
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/referral.ts
+      entities:
+        - UserData
+      abis:
+        - name: ReferralController
+          file: ./abis/ReferralController.json
+        - name: OracleReferral
+          file: ./abis/OracleReferral.json
+      eventHandlers:
+        - event: TradingPointUpdated(indexed uint256,indexed address,uint256)
+          handler: handleTradingPointUpdated
+        - event: ReferralPointUpdated(indexed uint256,indexed address,indexed address,uint256)
+          handler: handleReferralPointUpdated
+        - event: ReferrerSet(indexed address,indexed address)
+          handler: handleReferrerSet
+        - event: EpochStarted(indexed uint256)
+          handler: handleEpochStarted
+        - event: EpochDurationSet(uint256)
+          handler: handleEpochDurationSet
+        - event: Initialized(uint8)
+          handler: handleInitialized
+    network: bsc
+  - kind: ethereum
+    name: ReferralControllerV2
+    source:
+      abi: ReferralControllerV2
+      address: "0x977087422C008233615b572fBC3F209Ed300063a"
+      startBlock: 25805166
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/referral-v2.ts
+      entities:
+        - UserData
+      abis:
+        - name: ReferralControllerV2
+          file: ./abis/ReferralControllerV2.json
+        - name: OracleReferral
+          file: ./abis/OracleReferral.json
+      eventHandlers:
+        - event: TradingPointUpdated(indexed uint256,indexed address,uint256)
+          handler: handleTradingPointUpdated
+        - event: ReferralPointUpdated(indexed uint256,indexed address,indexed address,uint256)
+          handler: handleReferralPointUpdated
+        - event: ReferrerSet(indexed address,indexed address)
+          handler: handleReferrerSet
+        - event: EpochStarted(indexed uint256)
+          handler: handleEpochStarted
+        - event: EpochDurationSet(uint256)
+          handler: handleEpochDurationSet
+        - event: TierUpdated(indexed uint256,indexed address,uint256)
+          handler: handleTierUpdated
+    network: bsc

@@ -1,0 +1,141 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "version",
+        "type": "uint8"
+      }
+    ],
+    "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      }
+    ],
+    "name": "PriceUpdated",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "ethBusdPair",
+    "outputs": [
+      {
+        "internalType": "contract IUniswapV2Pair",
+        "name": "pair",
+        "type": "address"
+      },
+      { "internalType": "address", "name": "token", "type": "address" },
+      {
+        "components": [
+          { "internalType": "uint224", "name": "_x", "type": "uint224" }
+        ],
+        "internalType": "struct FixedPoint.uq112x112",
+        "name": "priceAverage",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lastBlockTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "priceCumulativeLast",
+        "type": "uint256"
+      },
+      { "internalType": "uint256", "name": "lastTWAP", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentTWAP",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_lvl", "type": "address" },
+      { "internalType": "address", "name": "_weth", "type": "address" },
+      { "internalType": "address", "name": "_lvlEthPair", "type": "address" },
+      { "internalType": "address", "name": "_ethBusdPair", "type": "address" },
+      { "internalType": "address", "name": "_updater", "type": "address" }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastTWAP",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lvlEthPair",
+    "outputs": [
+      {
+        "internalType": "contract IUniswapV2Pair",
+        "name": "pair",
+        "type": "address"
+      },
+      { "internalType": "address", "name": "token", "type": "address" },
+      {
+        "components": [
+          { "internalType": "uint224", "name": "_x", "type": "uint224" }
+        ],
+        "internalType": "struct FixedPoint.uq112x112",
+        "name": "priceAverage",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lastBlockTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "priceCumulativeLast",
+        "type": "uint256"
+      },
+      { "internalType": "uint256", "name": "lastTWAP", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "update",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "updater",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

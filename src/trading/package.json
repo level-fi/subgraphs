@@ -1,0 +1,11 @@
+{
+  "name": "trading",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "graph": "graph",
+    "deploy-testnet": "graph deploy 0x0level/trading-testnet --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ subgraph.testnet.yaml"
+  }
+}

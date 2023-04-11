@@ -1,0 +1,24 @@
+specVersion: 0.0.5
+description: Chain Blocks
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Block
+    source:
+      abi: Block
+      address: "0x0000000000000000000000000000000000000000"
+      startBlock: 27629460
+    network: chapel
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/block.ts
+      entities:
+        - Block
+      abis:
+        - name: Block
+          file: ./abis/validator.json
+      blockHandlers:
+        - handler: handleBlock

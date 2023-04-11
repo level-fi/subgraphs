@@ -1,0 +1,36 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: ReferralControllerV2
+    source:
+      abi: ReferralControllerV2
+      address: "0x2Eb3D4bFAC30B01101dE87dD8Bb73Da3Deb34c59"
+      startBlock: 27650935
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/referral-v2.ts
+      entities:
+        - UserData
+      abis:
+        - name: ReferralControllerV2
+          file: ./abis/ReferralControllerV2.json
+        - name: OracleReferral
+          file: ./abis/OracleReferral.json
+      eventHandlers:
+        - event: TradingPointUpdated(indexed uint256,indexed address,uint256)
+          handler: handleTradingPointUpdated
+        - event: ReferralPointUpdated(indexed uint256,indexed address,indexed address,uint256)
+          handler: handleReferralPointUpdated
+        - event: ReferrerSet(indexed address,indexed address)
+          handler: handleReferrerSet
+        - event: EpochStarted(indexed uint256)
+          handler: handleEpochStarted
+        - event: EpochDurationSet(uint256)
+          handler: handleEpochDurationSet
+        - event: TierUpdated(indexed uint256,indexed address,uint256)
+          handler: handleTierUpdated
+    network: chapel

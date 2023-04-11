@@ -1,0 +1,72 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: LVLAuctionFactory
+    source:
+      abi: AuctionFactory
+      address: "0xD463EeC58D1Eb7F94865e2F2c09f097f7EB0B895"
+      startBlock: 26398778
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/auctionFactory.ts
+      entities:
+        - Auction
+      abis:
+        - name: AuctionFactory
+          file: ./abis/AuctionFactory.json
+      eventHandlers:
+        - event: AuctionCreated(indexed address,indexed address,uint256,uint64,uint64,uint256,uint256,address,address)
+          handler: handleAuctionCreated
+          receipt: true
+    network: bsc
+  - kind: ethereum
+    name: LGOAuctionFactory
+    source:
+      abi: AuctionFactory
+      address: "0xc31bccd2106dae0b27c2c7e1385e12cef4512f5e"
+      startBlock: 26398778
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/auctionFactory.ts
+      entities:
+        - Auction
+      abis:
+        - name: AuctionFactory
+          file: ./abis/AuctionFactory.json
+      eventHandlers:
+        - event: AuctionCreated(indexed address,indexed address,uint256,uint64,uint64,uint256,uint256,address,address)
+          handler: handleAuctionCreated
+          receipt: true
+    network: bsc
+templates:
+  - kind: ethereum/contract
+    name: Auction
+    source:
+      abi: Auction
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/auction.ts
+      entities:
+        - Auction
+        - AuctionParticipant
+      abis:
+        - name: AuctionFactory
+          file: ./abis/AuctionFactory.json
+        - name: Auction
+          file: ./abis/Auction.json
+      eventHandlers:
+        - event: AddedCommitment(address,uint256)
+          handler: handleAddedCommitment
+        - event: AuctionFinalized()
+          handler: handleAuctionFinalized
+        - event: AuctionCancelled()
+          handler: handleAuctionCancelled
+    network: bsc

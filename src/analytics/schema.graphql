@@ -1,0 +1,261 @@
+enum Period {
+  hourly
+  fourhour
+  daily
+  weekly
+  total
+}
+
+enum PositionStatus {
+  OPEN
+  CLOSED
+  LIQUIDATED
+}
+
+enum LpActionType {
+  ADD
+  REMOVE
+  TRANSFER_IN
+  TRANSFER_OUT
+}
+
+type Protocol @entity {
+  id: ID!
+  openInterest: BigInt!
+  totalVolume: BigInt!
+  totalFee: BigInt!
+  totalValue: BigInt!
+  poolValue: BigInt!
+  pairLiquidity: BigInt!
+  lvlCirculatingSupply: BigInt!
+  totalUsers: Int!
+  daoFeeRatio: BigInt!
+  lastUpdatedBlock: BigInt!
+}
+
+type ProtocolStat @entity {
+  id: ID!
+  totalValueLocked: BigDecimal!
+  llpValue: BigDecimal!
+  pairLiquidity: BigDecimal!
+  lvlCirculatingSupply: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type Tranche @entity {
+  id: ID!
+  tranche: Bytes!
+  trancheValue: BigInt!
+  llpSupply: BigInt!
+  llpPrice: BigInt!
+  totalFeeValue: BigInt!
+}
+
+type TrancheStat @entity {
+  id: ID!
+  tranche: Bytes!
+  trancheValue: BigDecimal!
+  llpSupply: BigDecimal!
+  llpPrice: BigDecimal!
+  totalFeeValue: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type TokenDistributionStat @entity {
+  id: ID!
+  token: Bytes!
+  tranche: Bytes!
+  value: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type UserData @entity {
+  id: ID!
+  # count
+  actionSwapCount: Int!
+  actionTradingCount: Int!
+  actionMintBurnCount: Int!
+  actionReferralCount: Int!
+
+  period: Period!
+  timestamp: Int
+}
+
+type UserStat @entity {
+  id: ID!
+  # action count
+  actionCount: Int!
+  actionSwapCount: Int!
+  actionTradingCount: Int!
+  actionMintBurnCount: Int!
+  actionReferralCount: Int!
+  # unique user count
+  uniqueCount: Int!
+  uniqueSwapCount: Int!
+  uniqueTradingCount: Int!
+  uniqueMintBurnCount: Int!
+  uniqueReferralCount: Int!
+  # unique cumulative user count
+  uniqueCountCumulative: Int!
+  uniqueSwapCountCumulative: Int!
+  uniqueTradingCountCumulative: Int!
+  uniqueMintBurnCountCumulative: Int!
+  uniqueReferralCountCumulative: Int!
+
+  period: Period!
+  timestamp: Int!
+}
+
+type VolumeStat @entity {
+  id: ID!
+  trading: BigDecimal!
+  swap: BigDecimal!
+  total: BigDecimal!
+  cumulative: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type FeeStat @entity {
+  id: ID!
+  trading: BigDecimal!
+  swap: BigDecimal!
+  mint: BigDecimal!
+  burn: BigDecimal!
+  liquidate: BigDecimal!
+  cumulative: BigDecimal!
+  total: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type TradingStat @entity {
+  id: ID!
+  longOpenInterest: BigDecimal!
+  shortOpenInterest: BigDecimal!
+  traderPnl: BigDecimal!
+  cumulativeTraderPnl: BigDecimal!
+  traderFee: BigDecimal!
+  cumulativeTraderFee: BigDecimal!
+  daoFee: BigDecimal!
+  cumulativeDaoFee: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type TradingPairStat @entity {
+  id: ID!
+  indexToken: Bytes!
+  volumeUsd: BigInt!
+  volume: BigInt!
+  period: Period!
+  timestamp: Int!
+}
+
+# Loyalty
+
+type LoyaltyHistory @entity {
+  id: ID!
+  owner: Bytes!
+  indexToken: Bytes
+  collateralToken: Bytes
+  side: Int
+  sizeChange: BigInt
+  status: PositionStatus
+  timestamp: BigInt
+  amount: BigInt
+  price: BigInt
+  tx: Bytes!
+  #Swap
+  isSwap: Boolean!
+  tokenIn: Bytes
+  tokenOut: Bytes
+  amountIn: BigInt
+  amountOut: BigInt
+}
+
+type LoyaltyRedeemHistory @entity {
+  id: ID!
+  owner: Bytes!
+  amount: BigInt!
+  tx: Bytes!
+  timestamp: BigInt!
+}
+
+# Liquidity Provider
+
+type UserTrancheStat @entity {
+  id: ID!
+  user: Bytes!
+  tranche: Bytes!
+  llpAmount: BigInt!
+  llpValue: BigInt!
+  period: Period!
+  timestamp: Int!
+}
+
+type UserTrancheHistory @entity {
+  id: ID!
+  user: Bytes!
+  tranche: Bytes!
+  llpAmount: BigInt!
+  llpValue: BigInt!
+  llpAmountChange: BigInt!
+  llpValueChange: BigInt!
+  action: LpActionType!
+  timestamp: Int!
+  tx: Bytes!
+}
+
+# Borrow Index
+
+type BorrowIndex @entity {
+  id: ID!
+  startBorrowIndex: BigDecimal!
+  startTimestamp: Int!
+  endBorrowIndex: BigDecimal!
+  endTimestamp: Int!
+  token: Bytes!
+  period: Period!
+  timestamp: Int!
+}
+
+# Level Distribution Stat
+
+type LevelDistribution @entity {
+  id: ID!
+  stakeAmount: BigDecimal!
+  walletAmount: BigDecimal!
+  poolAmount: BigDecimal!
+  rewardClaimedAmount: BigDecimal!
+  pendingRewardAmount: BigDecimal!
+}
+
+type ChefConfig @entity {
+  id: ID!
+  lastUpdateTimeStamp: BigInt!
+  rewardAllocationPoint: BigInt!
+  rewardPerSecond: BigInt!
+  totalAllocationPoint: BigInt!
+}
+
+# Risk factor
+
+type RiskFactor @entity {
+  id: ID!
+  token: Bytes!
+  totalRiskFactor: BigInt!
+  riskFactors: [BigInt!]!
+}
+
+# Price
+type PriceStat @entity {
+  id: ID!
+  token: Bytes!
+  value: BigInt!
+  period: Period!
+  timestamp: Int!
+}

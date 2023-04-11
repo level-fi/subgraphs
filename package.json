@@ -1,0 +1,35 @@
+{
+  "name": "@levelfinance/subgraphs",
+  "private": true,
+  "description": "Level Subgraph",
+  "version": "1.0.0",
+  "author": "Level Finance",
+  "workspaces": [
+    "src/**/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "codegen": "turbo run codegen"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.37.1",
+    "@graphprotocol/graph-ts": "^0.27.0",
+    "@protofire/subgraph-toolkit": "^0.1.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.31.0",
+    "@typescript-eslint/parser": "^4.31.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "lerna": "^4.0.0",
+    "matchstick-as": "^0.5.0",
+    "prettier": "^2.4.0",
+    "turbo": "^1.8.8",
+    "typescript": "^4.3.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "ipfs-http-client@34.0.0>concat-stream": "github:mihirgupta0900/concat-stream#master"
+    }
+  }
+}

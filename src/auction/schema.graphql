@@ -1,0 +1,46 @@
+enum Period {
+  hourly
+  daily
+  total
+}
+
+type Auction @entity {
+  id: ID!
+  auctionToken: Bytes!
+  payToken: Bytes!
+  totalTokens: BigInt!
+  startTime: Int!
+  endTime: Int!
+  startPrice: BigInt!
+  minPrice: BigInt!
+  commitmentsTotal: BigInt!
+  auctionAdmin: Bytes!
+  auctionTreasury: Bytes!
+  participantCount: Int!
+  finalized: Boolean!
+  cancelled: Boolean!
+}
+
+type AuctionCommitment @entity {
+  id: ID!
+  auction: Auction!
+  user: Bytes!
+  totalCommitted: BigInt!
+}
+
+type AuctionCommitmentHistory @entity {
+  id: ID!
+  auction: Auction!
+  user: Bytes!
+  committed: BigInt!
+  timestamp: Int!
+  tx: Bytes!
+}
+
+type TokensCommitStats @entity {
+  id: ID!
+  auction: Bytes!
+  cumulative: BigDecimal!
+  timestamp: BigInt!
+  period: Period
+}

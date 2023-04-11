@@ -1,0 +1,11 @@
+{
+  "name": "referral",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "graph": "graph",
+    "deploy": "graph deploy level-fi/levelfinancereferral --product hosted-service"
+  }
+}
