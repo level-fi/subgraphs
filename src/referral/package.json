@@ -6,6 +6,7 @@
     "codegen": "graph codegen",
     "build": "graph build",
     "graph": "graph",
-    "deploy": "graph deploy level-fi/levelfinancereferral --product hosted-service"
+    "deploy": "graph deploy level-fi/levelfinancereferral --product hosted-service",
+    "clean": "rm -Rf build generated"
   }
 }

@@ -5,6 +5,7 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "graph": "graph"
+    "graph": "graph",
+    "clean": "rm -Rf build generated"
   }
 }

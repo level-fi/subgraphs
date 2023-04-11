@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "codegen": "turbo run codegen"
+    "codegen": "turbo run codegen",
+    "clean": "turbo run clean"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.37.1",
