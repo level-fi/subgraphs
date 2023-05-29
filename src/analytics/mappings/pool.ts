@@ -1,9 +1,8 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import {
   DaoFeeSet,
   DecreasePosition,
   IncreasePosition,
-  InterestAccrued,
   LiquidatePosition,
   LiquidityAdded,
   LiquidityRemoved,
@@ -11,17 +10,8 @@ import {
   Swap,
   TokenRiskFactorUpdated,
 } from "../generated/Pool/Pool";
-import {
-  BorrowIndex,
-  UserData,
-  UserStat,
-  UserTrancheHistory,
-} from "../generated/schema";
 import { config } from "../../config";
 import {
-  ACCRUAL_INTERVAL,
-  DECIMAL_ZERO,
-  INTEREST_RATE_DECIMALS,
   NEGATIVE_ONE,
   ONE,
   TOKEN_DECIMALS,
@@ -41,8 +31,6 @@ import {
   loadOrCreateTradingStat,
   loadOrCreateTranche,
   loadOrCreateTrancheStat,
-  loadOrCreateUserStat,
-  loadOrCreateUserTrancheStat,
   loadOrCreateVolumeStat,
   toDecimal,
   _calcDaoFee,
@@ -64,7 +52,6 @@ export function handlePositionIncreased(ev: IncreasePosition): void {
     ev.params.sizeChanged
   );
   _storePnl(ev.block.timestamp, ZERO, ev.params.feeValue);
-  _storeUserAction(ev.block.timestamp, "trading", ev.params.account);
   _storeTradingPair(
     ev.params.indexToken,
     ev.params.indexPrice,
@@ -100,7 +87,6 @@ export function handlePositionDecreased(ev: DecreasePosition): void {
     ),
     ev.params.feeValue
   );
-  _storeUserAction(ev.block.timestamp, "trading", ev.params.account);
   _storeTradingPair(
     ev.params.indexToken,
     ev.params.indexPrice,
@@ -131,7 +117,6 @@ export function handlePositionLiquidated(ev: LiquidatePosition): void {
     ),
     ev.params.feeValue
   );
-  _storeUserAction(ev.block.timestamp, "trading", ev.params.account);
   _storeTradingPair(
     ev.params.indexToken,
     ev.params.indexPrice,
@@ -157,17 +142,6 @@ export function handleLiquidityAdded(ev: LiquidityAdded): void {
     ? _calcTotalFee(feeValue)
     : feeValue;
   _storeFee("mint", ev.block.timestamp, realizedFeeValue);
-  _storeUserAction(ev.block.timestamp, "mintBurn", ev.transaction.from);
-  const mintLlpValue = tokenPrice.times(ev.params.amount);
-  _storeUserLiquidity(
-    ev.transaction.from,
-    ev.block.timestamp,
-    ev.params.tranche,
-    "ADD",
-    ev.params.lpAmount,
-    mintLlpValue.minus(realizedFeeValue),
-    ev.transaction.hash
-  );
   _storeTrancheFee(
     _calcReturnFee(realizedFeeValue),
     ev.params.tranche,
@@ -187,17 +161,6 @@ export function handleLiquidityRemoved(ev: LiquidityRemoved): void {
     ? _calcTotalFee(feeValue)
     : feeValue;
   _storeFee("burn", ev.block.timestamp, realizedFeeValue);
-  _storeUserAction(ev.block.timestamp, "mintBurn", ev.transaction.from);
-  const burnLlpValue = tokenPrice.times(ev.params.amountOut);
-  _storeUserLiquidity(
-    ev.transaction.from,
-    ev.block.timestamp,
-    ev.params.tranche,
-    "REMOVE",
-    ev.params.lpAmount,
-    burnLlpValue,
-    ev.transaction.hash
-  );
   _storeTrancheFee(
     _calcReturnFee(realizedFeeValue),
     ev.params.tranche,
@@ -220,7 +183,6 @@ export function handleSwap(ev: Swap): void {
     .div(BigInt.fromI32(2));
   _storeVolume("swap", ev.block.timestamp, volume);
   _storeFee("swap", ev.block.timestamp, feeValue);
-  _storeUserAction(ev.block.timestamp, "swap", ev.transaction.from);
   _storeTrancheFees(
     _calcReturnFee(feeValue),
     ev.params.tokenIn,
@@ -231,51 +193,6 @@ export function handleSwap(ev: Swap): void {
   }
   _storeTranches(ev.block.number, ev.block.timestamp);
   _storeProtocol(ev.block.number, ev.block.timestamp);
-}
-
-export function handleInterestAccrued(ev: InterestAccrued): void {
-  const borrowIndexIntervalTimestamp =
-    (ev.block.timestamp.toI32() / ACCRUAL_INTERVAL) * ACCRUAL_INTERVAL;
-  const timestamp = getDayId(ev.block.timestamp);
-  const id = `${timestamp}-daily-${ev.params.token.toHex()}`;
-  let entity = BorrowIndex.load(id);
-
-  const totalId = `total-${ev.params.token.toHex()}`;
-  let totalEntity = BorrowIndex.load(totalId);
-  if (!entity) {
-    entity = new BorrowIndex(id);
-    if (totalEntity) {
-      entity.startBorrowIndex = totalEntity.endBorrowIndex;
-      entity.startTimestamp = totalEntity.endTimestamp;
-    } else {
-      entity.startBorrowIndex = DECIMAL_ZERO;
-      entity.startTimestamp = borrowIndexIntervalTimestamp;
-    }
-    entity.timestamp = timestamp.toI32();
-    entity.token = ev.params.token;
-    entity.period = "daily";
-  }
-  entity.endBorrowIndex = toDecimal(
-    ev.params.borrowIndex,
-    INTEREST_RATE_DECIMALS
-  );
-  entity.endTimestamp = borrowIndexIntervalTimestamp;
-  entity.save();
-
-  if (totalEntity == null) {
-    totalEntity = new BorrowIndex(totalId);
-    totalEntity.period = "total";
-    totalEntity.startBorrowIndex = DECIMAL_ZERO;
-    totalEntity.token = ev.params.token;
-    totalEntity.startTimestamp = borrowIndexIntervalTimestamp;
-  }
-  totalEntity.endBorrowIndex = toDecimal(
-    ev.params.borrowIndex,
-    INTEREST_RATE_DECIMALS
-  );
-  totalEntity.timestamp = timestamp.toI32();
-  totalEntity.endTimestamp = borrowIndexIntervalTimestamp;
-  totalEntity.save();
 }
 
 export function handleDaoFeeSet(ev: DaoFeeSet): void {
@@ -484,7 +401,7 @@ function _storeTradingPair(
 }
 
 function _storeProtocol(block: BigInt, timestamp: BigInt): void {
-  const poolValue = _calcPoolValue();
+  const poolValue = _calcPoolValue(block);
   if (!poolValue || poolValue.equals(ZERO)) {
     return;
   }
@@ -501,10 +418,6 @@ function _storeProtocol(block: BigInt, timestamp: BigInt): void {
   let entity = loadOrCreateProtocolStat(dayId, "daily", getDayId(timestamp));
   entity.totalValueLocked = toDecimal(protocol.totalValue, VALUE_DECIMALS);
   entity.llpValue = toDecimal(protocol.poolValue, VALUE_DECIMALS);
-  entity.lvlCirculatingSupply = toDecimal(
-    protocol.lvlCirculatingSupply,
-    TOKEN_DECIMALS
-  );
   entity.pairLiquidity = toDecimal(protocol.pairLiquidity, VALUE_DECIMALS);
 
   entity.save();
@@ -518,8 +431,7 @@ function _storeTrancheFees(
 ): void {
   const riskFactorConfig = loadOrCreateRiskFactor(indexToken);
   const tranches = config.tranches;
-  const pool = Pool.bind(config.pool);
-  const isStableCoin = config.stableTokens.includes(indexToken);
+  const isStableCoin = config.stableTokens.indexOf(indexToken) > -1;
   const totalRiskFactor = riskFactorConfig.totalRiskFactor;
   const totalRiskFactor_ = isStableCoin
     ? BigInt.fromI32(config.tranches.length)
@@ -538,45 +450,6 @@ function _storeTrancheFees(
     // store total
     totalEntity.totalFeeValue = totalEntity.totalFeeValue.plus(share);
     totalEntity.tranche = tranche;
-    for (let i = 0; i < config.poolTokens.length; i++) {
-      const trancheAsset = pool.try_trancheAssets(
-        tranche,
-        config.poolTokens[i]
-      );
-      const price = _getPrice(config.poolTokens[i]);
-      if (trancheAsset.reverted || price.equals(ZERO)) {
-        return;
-      }
-      // store total
-      const totalTokenDistributionEntity = loadOrCreateTokenDistributionStat(
-        `total-${tranche.toHex()}-${config.poolTokens[i].toHex()}`,
-        tranche,
-        config.poolTokens[i],
-        "total",
-        getDayId(timestamp)
-      );
-      totalTokenDistributionEntity.value = toDecimal(
-        trancheAsset.value.getPoolAmount().times(price),
-        VALUE_DECIMALS
-      );
-
-      // store daily
-      const dayId = `day-${getDayId(timestamp)}`;
-      const tokenDistributionEntity = loadOrCreateTokenDistributionStat(
-        `${dayId}-${tranche.toHex()}-${config.poolTokens[i].toHex()}`,
-        tranche,
-        config.poolTokens[i],
-        "daily",
-        getDayId(timestamp)
-      );
-      tokenDistributionEntity.value = toDecimal(
-        trancheAsset.value.getPoolAmount().times(price),
-        VALUE_DECIMALS
-      );
-
-      totalTokenDistributionEntity.save();
-      tokenDistributionEntity.save();
-    }
     // store daily
     const dayId = `day-${getDayId(timestamp)}`;
     const entity = loadOrCreateTrancheStat(
@@ -604,47 +477,10 @@ function _storeTrancheFee(
   tranche: Address,
   timestamp: BigInt
 ): void {
-  const pool = Pool.bind(config.pool);
   const totalEntity = loadOrCreateTranche(tranche);
   // store total
   totalEntity.totalFeeValue = totalEntity.totalFeeValue.plus(feeValue);
   totalEntity.tranche = tranche;
-  for (let i = 0; i < config.poolTokens.length; i++) {
-    const trancheAsset = pool.try_trancheAssets(tranche, config.poolTokens[i]);
-    const price = _getPrice(config.poolTokens[i]);
-    if (trancheAsset.reverted || price.equals(ZERO)) {
-      return;
-    }
-    // store total
-    const totalTokenDistributionEntity = loadOrCreateTokenDistributionStat(
-      `total-${tranche.toHex()}-${config.poolTokens[i].toHex()}`,
-      tranche,
-      config.poolTokens[i],
-      "total",
-      getDayId(timestamp)
-    );
-    totalTokenDistributionEntity.value = toDecimal(
-      trancheAsset.value.getPoolAmount().times(price),
-      VALUE_DECIMALS
-    );
-
-    // store daily
-    const dayId = `day-${getDayId(timestamp)}`;
-    const tokenDistributionEntity = loadOrCreateTokenDistributionStat(
-      `${dayId}-${tranche.toHex()}-${config.poolTokens[i].toHex()}`,
-      tranche,
-      config.poolTokens[i],
-      "daily",
-      getDayId(timestamp)
-    );
-    tokenDistributionEntity.value = toDecimal(
-      trancheAsset.value.getPoolAmount().times(price),
-      VALUE_DECIMALS
-    );
-
-    totalTokenDistributionEntity.save();
-    tokenDistributionEntity.save();
-  }
   // store daily
   const dayId = `day-${getDayId(timestamp)}`;
   const entity = loadOrCreateTrancheStat(
@@ -741,152 +577,4 @@ function _storeTranches(block: BigInt, timestamp: BigInt): void {
     entity.save();
     totalEntity.save();
   }
-}
-
-export function _storeUserLiquidity(
-  user: Address,
-  timestamp: BigInt,
-  tranche: Address,
-  action: string,
-  llpAmount: BigInt,
-  llpValue: BigInt,
-  tx: Bytes
-): void {
-  // store total
-  let totalEntity = loadOrCreateUserTrancheStat(
-    `total-${user.toHex()}-${tranche.toHex()}`,
-    user,
-    tranche,
-    "total",
-    getDayId(timestamp)
-  );
-  if (action === "ADD" || action === "TRANSFER_IN") {
-    totalEntity.llpAmount = totalEntity.llpAmount.plus(llpAmount);
-    totalEntity.llpValue = totalEntity.llpValue.plus(llpValue);
-  } else if (action === "REMOVE" || action === "TRANSFER_OUT") {
-    totalEntity.llpAmount = totalEntity.llpAmount.minus(llpAmount);
-    totalEntity.llpValue = totalEntity.llpValue.minus(llpValue);
-  }
-
-  // store daily
-  const dayId = `day-${getDayId(timestamp)}-${user.toHex()}-${tranche.toHex()}`;
-  let entity = loadOrCreateUserTrancheStat(
-    dayId,
-    user,
-    tranche,
-    "daily",
-    getDayId(timestamp)
-  );
-  entity.llpAmount = totalEntity.llpAmount;
-  entity.llpValue = totalEntity.llpValue;
-
-  entity.save();
-  totalEntity.save();
-
-  // store history
-  const history = new UserTrancheHistory(
-    `${user.toHex()}-${tranche.toHex()}-${timestamp}`
-  );
-  history.user = user;
-  history.tranche = tranche;
-  history.action = action;
-  history.llpAmount = totalEntity.llpAmount;
-  history.llpValue = totalEntity.llpValue;
-  history.llpValueChange = llpValue;
-  history.llpAmountChange = llpAmount;
-  history.timestamp = timestamp.toI32();
-  history.tx = tx;
-  history.save();
-}
-
-export function _storeUserAction(
-  timestamp: BigInt,
-  type: string,
-  account: Address
-): void {
-  const total = _storeUserActionByPeriod(
-    timestamp,
-    type,
-    account,
-    "total",
-    null
-  );
-  _storeUserActionByPeriod(timestamp, type, account, "daily", total);
-}
-
-export function _storeUserActionByPeriod(
-  timestamp: BigInt,
-  type: string,
-  account: Address,
-  period: string,
-  userStatTotal: UserStat | null
-): UserStat {
-  const isTotal = period === "total";
-  const dayId = `day-${getDayId(timestamp)}`;
-  let userId = isTotal
-    ? `${account.toHex()}-total`
-    : `${account.toHex()}-${getDayId(timestamp)}`;
-  let protocol = loadOrCreateProtocol();
-  let userStat = loadOrCreateUserStat(
-    isTotal ? "total" : dayId,
-    period,
-    getDayId(timestamp)
-  );
-  let user = UserData.load(userId);
-  if (user === null) {
-    user = new UserData(userId);
-    user.period = period;
-    user.timestamp = getDayId(timestamp).toI32();
-    user.actionSwapCount = 0;
-    user.actionTradingCount = 0;
-    user.actionMintBurnCount = 0;
-    user.actionReferralCount = 0;
-    userStat.uniqueCount++;
-    if (isTotal) {
-      userStat.uniqueCountCumulative = userStat.uniqueCount;
-      protocol.totalUsers = userStat.uniqueCountCumulative;
-    } else if (userStatTotal != null) {
-      userStat.uniqueCountCumulative = userStatTotal.uniqueCount;
-    }
-  }
-  userStat.actionCount++;
-  let actionCountProp: string = "";
-  let uniqueCountProp: string = "";
-  if (type === "trading") {
-    actionCountProp = "actionTradingCount";
-    uniqueCountProp = "uniqueTradingCount";
-  } else if (type === "swap") {
-    actionCountProp = "actionSwapCount";
-    uniqueCountProp = "uniqueSwapCount";
-  } else if (type === "mintBurn") {
-    actionCountProp = "actionMintBurnCount";
-    uniqueCountProp = "uniqueMintBurnCount";
-  } else if (type === "referral") {
-    actionCountProp = "actionReferralCount";
-    uniqueCountProp = "uniqueReferralCount";
-  }
-  let uniqueCountCumulativeProp = uniqueCountProp + "Cumulative";
-  if (user.getI32(actionCountProp) === 0) {
-    userStat.setI32(uniqueCountProp, userStat.getI32(uniqueCountProp) + 1);
-  }
-  user.setI32(actionCountProp, user.getI32(actionCountProp) + 1);
-  userStat.setI32(actionCountProp, userStat.getI32(actionCountProp) + 1);
-
-  if (isTotal) {
-    userStat.setI32(
-      uniqueCountCumulativeProp,
-      userStat.getI32(uniqueCountProp)
-    );
-  } else if (userStatTotal != null) {
-    userStat.setI32(
-      uniqueCountCumulativeProp,
-      userStatTotal.getI32(uniqueCountProp)
-    );
-  }
-
-  user.save();
-  userStat.save();
-  protocol.save();
-
-  return userStat;
 }

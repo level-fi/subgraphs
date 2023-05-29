@@ -2,7 +2,6 @@ import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 import { Pool } from "../generated/Pool/Pool";
 import {
   FeeStat,
-  LevelDistribution,
   PriceStat,
   Protocol,
   ProtocolStat,
@@ -12,8 +11,6 @@ import {
   TradingStat,
   Tranche,
   TrancheStat,
-  UserStat,
-  UserTrancheStat,
   VolumeStat,
 } from "../generated/schema";
 import { config } from "../../config";
@@ -118,35 +115,6 @@ export function loadOrCreateTradingStat(
   return entity;
 }
 
-export function loadOrCreateUserStat(
-  id: string,
-  period: string,
-  timestamp: BigInt
-): UserStat {
-  let entity = UserStat.load(id);
-  if (entity === null) {
-    entity = new UserStat(id);
-    entity.uniqueCount = 0;
-    entity.uniqueTradingCount = 0;
-    entity.uniqueSwapCount = 0;
-    entity.uniqueMintBurnCount = 0;
-    entity.uniqueReferralCount = 0;
-    entity.uniqueCountCumulative = 0;
-    entity.uniqueTradingCountCumulative = 0;
-    entity.uniqueSwapCountCumulative = 0;
-    entity.uniqueMintBurnCountCumulative = 0;
-    entity.uniqueReferralCountCumulative = 0;
-    entity.actionCount = 0;
-    entity.actionTradingCount = 0;
-    entity.actionSwapCount = 0;
-    entity.actionMintBurnCount = 0;
-    entity.actionReferralCount = 0;
-    entity.period = period;
-    entity.timestamp = timestamp.toI32();
-  }
-  return entity;
-}
-
 export function loadOrCreateProtocol(): Protocol {
   let entity = Protocol.load("1");
   if (entity === null) {
@@ -157,7 +125,6 @@ export function loadOrCreateProtocol(): Protocol {
     entity.totalVolume = ZERO;
     entity.poolValue = ZERO;
     entity.pairLiquidity = ZERO;
-    entity.lvlCirculatingSupply = ZERO;
     entity.totalUsers = 0;
     entity.daoFeeRatio = ZERO;
     entity.lastUpdatedBlock = ZERO;
@@ -237,39 +204,6 @@ export function loadOrCreateTokenDistributionStat(
     entity.timestamp = timestamp.toI32();
   }
   return entity;
-}
-
-export function loadOrCreateUserTrancheStat(
-  id: string,
-  user: Address,
-  tranche: Address,
-  period: string,
-  timestamp: BigInt
-): UserTrancheStat {
-  let entity = UserTrancheStat.load(id);
-  if (entity === null) {
-    entity = new UserTrancheStat(id);
-    entity.user = user;
-    entity.tranche = tranche;
-    entity.llpAmount = ZERO;
-    entity.llpValue = ZERO;
-    entity.period = period;
-    entity.timestamp = timestamp.toI32();
-  }
-  return entity;
-}
-
-export function loadOrCreateLevelDistribution(): LevelDistribution {
-  let levelDistribution = LevelDistribution.load("lvl-distribution");
-  if (!levelDistribution) {
-    levelDistribution = new LevelDistribution("lvl-distribution");
-    levelDistribution.rewardClaimedAmount = DECIMAL_ZERO;
-    levelDistribution.stakeAmount = DECIMAL_ZERO;
-    levelDistribution.poolAmount = DECIMAL_ZERO;
-    levelDistribution.walletAmount = DECIMAL_ZERO;
-    levelDistribution.pendingRewardAmount = DECIMAL_ZERO;
-  }
-  return levelDistribution;
 }
 
 export function loadOrCreatePriceStat(
@@ -379,16 +313,18 @@ export function _calcTrancheValue(
     .div(BigInt.fromI32(2));
 }
 
-export function _calcPoolValue(): BigInt | null {
-  let poolValue = ZERO;
-  for (let i = 0; i < config.tranches.length; i++) {
-    const tranche = Tranche.load(`${config.tranches[i].toHex()}`);
-    if (!tranche) {
-      return null;
-    }
-    poolValue = poolValue.plus(tranche.trancheValue);
+export function _calcPoolValue(block: BigInt): BigInt | null {
+  const poolContract = Pool.bind(config.pool);
+  if (block.lt(config.oracle_block_update)) {
+    const poolValue = poolContract.try_getPoolValue1();
+    return poolValue.reverted ? null : poolValue.value;
   }
-  return poolValue;
+  const maxPoolValue = poolContract.try_getPoolValue(true);
+  const minPoolValue = poolContract.try_getPoolValue(false);
+  if (maxPoolValue.reverted || minPoolValue.reverted) {
+    return null;
+  }
+  return maxPoolValue.value.plus(minPoolValue.value).div(BigInt.fromI32(2));
 }
 
 export function _needUpdate(block: BigInt): boolean {

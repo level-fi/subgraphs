@@ -1,7 +1,7 @@
-import { AuctionCreated } from "../generated/LVLAuctionFactory/AuctionFactory";
 import { Auction } from "../generated/schema";
 import { BigInt, ByteArray, crypto } from "@graphprotocol/graph-ts";
 import { Auction as AuctionTemplate } from "../generated/templates";
+import { AuctionCreated } from "../generated/LVLAuctionFactory/AuctionFactory";
 
 export function handleAuctionCreated(ev: AuctionCreated): void {
   const receipt = ev.receipt;

@@ -1,0 +1,56 @@
+type Contest @entity {
+  id: ID!
+  totalRecord: BigInt!
+  batches: [BatchInfo!] @derivedFrom(field: "contest")
+}
+
+type Record @entity {
+  id: ID!
+  trader: String!
+  batch: BigInt!
+  value: BigInt!
+  point: BigInt!
+  lvlStake: BigInt!
+  daoStake: BigInt!
+  lvlStaking: BigInt!
+  blockNumber: BigInt!
+  createdAt: BigInt!
+  participant: Participant!
+  txHash: Bytes!
+}
+
+type Participant @entity {
+  id: ID!
+  trader: Bytes!
+  batch: BatchInfo!
+  totalValue: BigInt!
+  totalPoint: BigInt!
+  lastTradePoint: BigInt!
+  lastTradeTimestamp: BigInt!
+  records: [Record!]! @derivedFrom(field: "participant")
+}
+
+type BatchInfo @entity {
+  id: ID!
+  contest: Contest!
+  batch: BigInt!
+  blockNumber: BigInt!
+  createdAt: BigInt!
+  totalPoint: BigInt!
+  totalValue: BigInt!
+  isClosed: Boolean!
+  finalized: Boolean!
+  leaderUpdated: Boolean!
+  traders: [Participant!]! @derivedFrom(field: "batch")
+}
+
+type IncentiveControllerEpochInfo @entity {
+  id: ID!
+  epoch: BigInt!
+  blockNumber: BigInt!
+  createdAt: BigInt!
+  allocateTime: BigInt
+  epochFee: BigInt!
+  contestReward: BigInt!
+  loyaltyReward: BigInt!
+}

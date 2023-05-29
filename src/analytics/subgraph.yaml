@@ -50,56 +50,12 @@ dataSources:
           handler: handleSwap
         - event: Swap(indexed address,address,address,uint256,uint256,uint256)
           handler: handleSwap
-        - event: InterestAccrued(address,uint256)
-          handler: handleInterestAccrued
-        - event: InterestAccrued(indexed address,uint256)
-          handler: handleInterestAccrued
-        - event:  DaoFeeSet(uint256)
+        - event: DaoFeeSet(uint256)
           handler: handleDaoFeeSet
-        - event:  TokenRiskFactorUpdated(address)
+        - event: TokenRiskFactorUpdated(address)
           handler: handleTokenRiskFactorUpdated
-        - event:  TokenRiskFactorUpdated(indexed address)
+        - event: TokenRiskFactorUpdated(indexed address)
           handler: handleTokenRiskFactorUpdated
-    network: bsc
-  - kind: ethereum
-    name: ReferralController
-    source:
-      abi: ReferralController
-      address: "0x22E7F559bE09B6A758F02A84dDC64f45642206a1"
-      startBlock: 24890311
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      file: ./mappings/referral.ts
-      entities:
-        - UserData
-      abis:
-        - name: ReferralController
-          file: ./abis/ReferralController.json
-      eventHandlers:
-        - event: ReferrerSet(indexed address,indexed address)
-          handler: handleReferrerSet
-    network: bsc
-  - kind: ethereum
-    name: ReferralControllerV2
-    source:
-      abi: ReferralController
-      address: "0x977087422C008233615b572fBC3F209Ed300063a"
-      startBlock: 25805166
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      file: ./mappings/referral.ts
-      entities:
-        - UserData
-      abis:
-        - name: ReferralController
-          file: ./abis/ReferralController.json
-      eventHandlers:
-        - event: ReferrerSet(indexed address,indexed address)
-          handler: handleReferrerSet
     network: bsc
   - kind: ethereum
     name: LyLevel
@@ -125,6 +81,50 @@ dataSources:
           receipt: true
         - event: Claimed(indexed address,indexed uint256,uint256,address)
           handler: handleClaimed
+    network: bsc
+  - kind: ethereum
+    name: Oracle
+    source:
+      abi: Oracle
+      address: "0x04Db83667F5d59FF61fA6BbBD894824B233b3693"
+      startBlock: 24148430
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PriceStat
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: PricePosted(indexed address,uint256)
+          handler: handlePricePost
+        - event: PricePosted(address,uint256)
+          handler: handlePricePost
+      file: ./mappings/oracle.ts
+    network: bsc
+  - kind: ethereum
+    name: LVLPair
+    source:
+      abi: Pair
+      address: "0x70f16782010fa7ddf032a6aacdeed05ac6b0bc85"
+      startBlock: 24239465
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PriceStat
+      abis:
+        - name: Pair
+          file: ./abis/Pair.json
+      eventHandlers:
+        - event: Sync(uint112,uint112)
+          handler: handleSync
+      file: ./mappings/pair.ts
     network: bsc
   - kind: ethereum
     name: SLPToken
@@ -185,120 +185,4 @@ dataSources:
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
-    network: bsc
-  - kind: ethereum
-    name: Level
-    source:
-      abi: ERC20
-      address: "0xB64E280e9D1B5DbEc4AcceDb2257A87b400DB149"
-      startBlock: 23830452
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      file: ./mappings/level.ts
-      entities:
-        - LevelDistribution
-      abis:
-        - name: ERC20
-          file: ./abis/ERC20.json
-        - name: Staking
-          file: ./abis/Staking.json
-      eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
-          receipt: true
-    network: bsc
-  - kind: ethereum
-    name: LevelStake
-    source:
-      abi: Staking
-      address: "0x87CC04d6FE59859cB7eB6d970EBc22dCdCBc9368"
-      startBlock: 24146112
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      file: ./mappings/staking.ts
-      entities:
-        - LevelDistribution
-      abis:
-        - name: Staking
-          file: ./abis/Staking.json
-      eventHandlers:
-        - event: Staked(indexed address,indexed address,uint256)
-          handler: handleStaked
-        - event: Unstaked(indexed address,indexed address,uint256)
-          handler: handleUnstaked
-    network: bsc
-  - kind: ethereum
-    name: LevelMaster
-    source:
-      abi: LevelMaster
-      address: "0x5aE081b6647aEF897dEc738642089D4BDa93C0e7"
-      startBlock: 24658693
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      file: ./mappings/chef.ts
-      entities:
-        - LevelDistribution
-        - ChefConfig
-      abis:
-        - name: LevelMaster
-          file: ./abis/LevelMaster.json
-      eventHandlers:
-        - event: LogSetPool(indexed uint256,uint256,indexed address,bool)
-          handler: handleLogSetPool
-        - event: LogPoolAddition(indexed uint256,uint256,indexed address,indexed address)
-          handler: handleLogPoolAddition
-        - event: Harvest(indexed address,indexed uint256,uint256)
-          handler: handleHarvest
-        - event: LogRewardPerSecond(uint256)
-          handler: handleLogRewardPerSecond
-    network: bsc
-  - kind: ethereum
-    name: Oracle
-    source:
-      abi: Oracle
-      address: "0x04Db83667F5d59FF61fA6BbBD894824B233b3693"
-      startBlock: 24148430
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - PriceStat
-      abis:
-        - name: ERC20
-          file: ./abis/ERC20.json
-        - name: Oracle
-          file: ./abis/Oracle.json
-      eventHandlers:
-        - event: PricePosted(indexed address,uint256)
-          handler: handlePricePost
-        - event: PricePosted(address,uint256)
-          handler: handlePricePost
-      file: ./mappings/oracle.ts
-    network: bsc
-  - kind: ethereum
-    name: LVLPair
-    source:
-      abi: Pair
-      address: "0x70f16782010fa7ddf032a6aacdeed05ac6b0bc85"
-      startBlock: 24239465
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.7
-      language: wasm/assemblyscript
-      entities:
-        - PriceStat
-      abis:
-        - name: Pair
-          file: ./abis/Pair.json
-      eventHandlers:
-        - event: Sync(uint112,uint112)
-          handler: handleSync
-      file: ./mappings/pair.ts
     network: bsc

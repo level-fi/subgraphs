@@ -24,6 +24,27 @@ dataSources:
           receipt: true
     network: bsc
   - kind: ethereum
+    name: LVLBatchAuctionFactory
+    source:
+      abi: BatchAuctionFactory
+      address: "0x30f00859a0b4893b8201cb6478434eb8ddb9195a"
+      startBlock: 27450308
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/batchAuctionFactory.ts
+      entities:
+        - Auction
+      abis:
+        - name: BatchAuctionFactory
+          file: ./abis/BatchAuctionFactory.json
+      eventHandlers:
+        - event: AuctionCreated(indexed address,indexed address,uint256,uint64,uint64,uint256,uint256,address,address,address)
+          handler: handleBatchAuctionCreated
+          receipt: true
+    network: bsc
+  - kind: ethereum
     name: LGOAuctionFactory
     source:
       abi: AuctionFactory
