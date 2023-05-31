@@ -1,0 +1,10 @@
+{
+  "name": "subgraph-lite",
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.45.1",
+    "@graphprotocol/graph-ts": "^0.29.3"
+  },
+  "scripts": {
+    "graph": "graph"
+  }
+}

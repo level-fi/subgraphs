@@ -1,0 +1,74 @@
+enum OrderStatus {
+  OPEN
+  CANCELLED
+  FILLED
+  EXPIRED
+}
+
+enum UpdatePositionType {
+  INCREASE
+  DECREASE
+}
+
+enum Side {
+  LONG
+  SHORT
+}
+
+type User @entity {
+  id: ID!
+  perpOrderCount: BigInt!
+  openPerpOrderCount: BigInt!
+  swapOrderCount: BigInt!
+  openSwapOrderCount: BigInt!
+  perpOrders: [PerpOrder!]! @derivedFrom(field: "owner")
+  swapOrders: [SwapOrder!]! @derivedFrom(field: "owner")
+  positions: [Position!]! @derivedFrom(field: "owner")
+}
+
+type PerpOrder @entity {
+  id: ID!
+  orderId: BigInt!
+  owner: User!
+  indexToken: Bytes!
+  collateralToken: Bytes!
+  payToken: Bytes!
+  price: BigInt!
+  side: Int!
+  triggerAboveThreshold: Boolean!
+  status: OrderStatus!
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  expiresAt: BigInt!
+  updateType: UpdatePositionType!
+  sizeChange: BigInt!
+  collateral: BigInt!
+}
+
+type SwapOrder @entity {
+  id: ID!
+  orderId: BigInt!
+  owner: User!
+  tokenIn: Bytes!
+  tokenOut: Bytes!
+  amountIn: BigInt!
+  minAmountOut: BigInt!
+  status: OrderStatus!
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+}
+
+enum PositionStatus {
+  OPEN
+  CLOSED
+  LIQUIDATED
+}
+
+type Position @entity {
+  id: ID!
+  owner: User!
+  indexToken: Bytes!
+  collateralToken: Bytes!
+  side: Side!
+  status: PositionStatus
+}

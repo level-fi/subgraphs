@@ -1,0 +1,69 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: OrderManager
+    network: bsc
+    source:
+      abi: OrderManager
+      address: '0xf584A17dF21Afd9de84F47842ECEAF6042b1Bb5b'
+      startBlock: 23752484
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Order
+        - SwapOrder
+      abis:
+        - name: OrderManager
+          file: ./abis/OrderManager.json
+      eventHandlers:
+        - event: OrderPlaced(indexed uint256,(address,address,address,address,address,uint256,uint256,uint256,uint256,bool),(uint8,uint256,uint256,uint8))
+          handler: handlePerpOrderPlaced
+        - event: OrderCancelled(indexed uint256)
+          handler: handlePerpOrderCancelled
+        - event: OrderExpired(indexed uint256)
+          handler: handlePerpOrderExpired
+        - event: OrderExecuted(indexed uint256,(address,address,address,address,address,uint256,uint256,uint256,uint256,bool),(uint8,uint256,uint256,uint8),uint256)
+          handler: handlePerpOrderExecuted
+        - event: SwapOrderPlaced(indexed uint256)
+          handler: handleSwapOrderPlaced
+        - event: SwapOrderCancelled(indexed uint256)
+          handler: handleSwapOrderCancelled
+        - event: SwapOrderExecuted(indexed uint256,uint256,uint256)
+          handler: handleSwapOrderExecuted
+      file: src/orders.ts
+
+  - kind: ethereum
+    name: Pool
+    network: bsc
+    source:
+      abi: Pool
+      address: '0xA5aBFB56a78D2BD4689b25B8A77fd49Bb0675874'
+      startBlock: 23752484
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Position
+      abis:
+        - name: Pool
+          file: ./abis/Pool.json
+      eventHandlers:
+        - event: IncreasePosition(bytes32,address,address,address,uint256,uint256,uint8,uint256,uint256)
+          handler: handleIncreasePosition
+        - event: ClosePosition(bytes32,uint256,uint256,uint256,uint256,uint256)
+          handler: handleClosePosition
+        - event: LiquidatePosition(bytes32,address,address,address,uint8,uint256,uint256,uint256,uint256,(uint256,uint256),uint256)
+          handler: handleLiquidatePosition
+        # indexed events 
+        - event: IncreasePosition(indexed bytes32,address,address,address,uint256,uint256,uint8,uint256,uint256)
+          handler: handleIncreasePosition
+        - event: ClosePosition(indexed bytes32,uint256,uint256,uint256,uint256,uint256)
+          handler: handleClosePosition
+        - event: LiquidatePosition(indexed bytes32,address,address,address,uint8,uint256,uint256,uint256,uint256,(uint256,uint256),uint256)
+          handler: handleLiquidatePosition
+      file: src/positions.ts
