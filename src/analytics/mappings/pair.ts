@@ -32,10 +32,6 @@ export function handleSync(ev: Sync): void {
   );
   entity.totalValueLocked = toDecimal(protocol.totalValue, VALUE_DECIMALS);
   entity.llpValue = toDecimal(protocol.poolValue, VALUE_DECIMALS);
-  entity.lvlCirculatingSupply = toDecimal(
-    protocol.lvlCirculatingSupply,
-    TOKEN_DECIMALS
-  );
 
   entity.save();
   protocol.save();
