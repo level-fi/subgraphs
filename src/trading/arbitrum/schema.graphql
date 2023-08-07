@@ -1,0 +1,213 @@
+enum OrderStatus {
+  OPEN
+  CANCELLED
+  FILLED
+  EXPIRED
+}
+
+enum UpdateType {
+  INCREASE
+  DECREASE
+  SWAP
+}
+
+enum OrderType {
+  MARKET
+  LIMIT
+}
+
+enum PositionStatus {
+  OPEN
+  CLOSED
+  LIQUIDATED
+}
+
+enum HistoryStatus {
+  OPEN
+  CANCELLED
+  FILLED
+  EXPIRED
+  LIQUIDATED
+}
+
+type Market @entity {
+  id: ID! # use token address for ID
+  indexToken: Token!
+}
+
+type Token @entity {
+  id: ID!
+  symbol: String!
+  decimals: Int!
+  price: BigDecimal!
+}
+
+# Orders
+type Order @entity {
+  id: ID!
+  owner: Bytes!
+  collateralToken: Bytes
+  payToken: Bytes
+  sizeChange: BigInt
+  collateralValue: BigInt
+  executionFee: BigInt!
+  expiresAt: BigInt
+  submissionBlock: BigInt
+  submissionTimestamp: BigInt!
+  executionTimestamp: BigInt
+  side: Int
+  updateType: UpdateType!
+  type: OrderType!
+  price: BigInt!
+  triggerAboveThreshold: Boolean
+  status: OrderStatus!
+  executionPrice: BigInt!
+  market: Market
+  tx: Bytes!
+
+  # SwapOrder
+  tokenIn: Bytes
+  tokenOut: Bytes
+  amountIn: BigInt
+  minAmountOut: BigInt
+  amountOut: BigInt
+}
+
+type Position @entity {
+  id: ID!
+  owner: Bytes!
+  side: Int!
+  collateralToken: Bytes!
+  size: BigInt!
+  collateralValue: BigInt!
+  leverage: BigInt!
+  reserveAmount: BigInt!
+  entryPrice: BigInt!
+  entryInterestRate: BigInt!
+  status: PositionStatus!
+  createdAtTimestamp: BigInt!
+  market: Market!
+  realizedPnl: BigInt!
+}
+
+type User @entity {
+  id: ID!
+  positionCount: Int!
+  orderCount: Int!
+  swapOrderCount: Int!
+  swapCount: Int!
+}
+
+type History @entity {
+  id: ID!
+  owner: Bytes!
+  size: BigInt
+  collateralValue: BigInt
+  side: Int
+  type: OrderType
+  updateType: UpdateType
+  collateralToken: Bytes
+  market: Market
+  triggerPrice: BigInt
+  executionPrice: BigInt
+  liquidatedPrice: BigInt
+  triggerAboveThreshold: Boolean
+  pnl: BigInt
+  borrowFeeValue: BigInt
+  closeFeeValue: BigInt
+  liquidatedFeeValue: BigInt
+  status: HistoryStatus!
+  createdAtTimestamp: BigInt!
+  tx: Bytes!
+
+  #SwapOrder
+  swapFeeValue: BigInt
+  valueIn: BigInt
+  tokenIn: Bytes
+  tokenOut: Bytes
+  amountIn: BigInt
+  minAmountOut: BigInt
+  amountOut: BigInt
+}
+
+# Price
+type PriceStat @entity {
+  id: ID!
+  token: Bytes!
+  value: BigInt!
+}
+
+# Swap History
+type SwapHistory @entity {
+  id: ID!
+  sender: Bytes!
+  tokenIn: Bytes!
+  amountIn: BigInt!
+  valueIn: BigInt!
+  tokenOut: Bytes!
+  amountOut: BigInt!
+  feeValue: BigInt!
+  tx: Bytes!
+  createdAtTimestamp: BigInt!
+}
+
+
+# Loyalty
+type LoyaltyHistory @entity {
+  id: ID!
+  owner: Bytes!
+  indexToken: Bytes
+  collateralToken: Bytes
+  side: Int
+  sizeChange: BigInt
+  collateralValue: BigInt
+  status: PositionStatus
+  timestamp: BigInt
+  amount: BigInt
+  price: BigInt
+  tx: Bytes!
+  #Swap
+  isSwap: Boolean!
+  tokenIn: Bytes
+  tokenOut: Bytes
+  amountIn: BigInt
+  amountOut: BigInt
+}
+
+type LoyaltyRedeemHistory @entity {
+  id: ID!
+  owner: Bytes!
+  amount: BigInt!
+  tx: Bytes!
+  timestamp: BigInt!
+}
+
+type LoyaltyProgram @entity {
+  id: ID!
+  rewardPerShare: BigInt!
+  totalBalance: BigInt!
+  startTime: BigInt!
+  allocatedTime: BigInt!
+  batchVestingDuration: BigInt!
+  rewardAmount: BigInt!
+}
+
+type LoyaltyProtocol @entity {
+  id: ID!
+  currentBatch: BigInt!
+  batchVestingDuration: BigInt!
+}
+
+type LoyaltyUserBatch @entity {
+  id: ID!
+  batch: LoyaltyProgram!
+  batchId: BigInt!
+  user: Bytes!
+  amount: BigInt!
+  lastRewardTime: BigInt!
+}
+
+type Protocol @entity {
+  id: ID!
+  oracle: Bytes!
+}

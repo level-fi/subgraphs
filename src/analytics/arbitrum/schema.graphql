@@ -1,0 +1,201 @@
+enum Period {
+  hourly
+  fourhour
+  daily
+  weekly
+  total
+}
+
+enum PositionStatus {
+  OPEN
+  CLOSED
+  LIQUIDATED
+}
+
+type Protocol @entity {
+  id: ID!
+  openInterest: BigInt!
+  totalVolume: BigInt!
+  totalFee: BigInt!
+  totalValue: BigInt!
+  poolValue: BigInt!
+  pairLiquidity: BigInt!
+  totalUsers: Int!
+  daoFeeRatio: BigInt!
+  oracle: Bytes!
+  lastUpdatedBlock: BigInt!
+}
+
+type ProtocolStat @entity {
+  id: ID!
+  totalValueLocked: BigDecimal!
+  llpValue: BigDecimal!
+  pairLiquidity: BigDecimal!
+  lvlCirculatingSupply: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type Tranche @entity {
+  id: ID!
+  tranche: Bytes!
+  trancheValue: BigInt!
+  llpSupply: BigInt!
+  llpPrice: BigInt!
+  tradingFeeValue: BigInt!
+  swapFeeValue: BigInt!
+  mintFeeValue: BigInt!
+  burnFeeValue: BigInt!
+  liquidateFeeValue: BigInt!
+  totalFeeValue: BigInt!
+  traderPnl: BigInt!
+  traderFee: BigInt!
+  returnFee: BigInt!
+}
+
+type TrancheStat @entity {
+  id: ID!
+  tranche: Bytes!
+  trancheValue: BigDecimal!
+  llpSupply: BigDecimal!
+  llpPrice: BigDecimal!
+  tradingFeeValue: BigDecimal!
+  swapFeeValue: BigDecimal!
+  mintFeeValue: BigDecimal!
+  burnFeeValue: BigDecimal!
+  liquidateFeeValue: BigDecimal!
+  totalFeeValue: BigDecimal!
+  traderPnl: BigDecimal!
+  cumulativeTraderPnl: BigDecimal!
+  traderFee: BigDecimal!
+  cumulativeTraderFee: BigDecimal!
+  returnFee: BigDecimal!
+  cumulativeReturnFee: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type TrancheFee @entity {
+  id: ID!
+  tranche: Bytes!
+  token: Bytes!
+  trading: BigInt!
+  swap: BigInt!
+  mint: BigInt!
+  burn: BigInt!
+  liquidate: BigInt!
+}
+
+type TokenDistributionStat @entity {
+  id: ID!
+  token: Bytes!
+  tranche: Bytes!
+  value: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type VolumeStat @entity {
+  id: ID!
+  trading: BigDecimal!
+  swap: BigDecimal!
+  mint: BigDecimal!
+  burn: BigDecimal!
+  liquidate: BigDecimal!
+  total: BigDecimal!
+  cumulative: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type FeeStat @entity {
+  id: ID!
+  trading: BigDecimal!
+  swap: BigDecimal!
+  mint: BigDecimal!
+  burn: BigDecimal!
+  liquidate: BigDecimal!
+  cumulative: BigDecimal!
+  dao: BigInt!
+  total: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type TradingStat @entity {
+  id: ID!
+  longOpenInterest: BigDecimal!
+  shortOpenInterest: BigDecimal!
+  traderPnl: BigDecimal!
+  cumulativeTraderPnl: BigDecimal!
+  traderFee: BigDecimal!
+  cumulativeTraderFee: BigDecimal!
+  daoFee: BigDecimal!
+  cumulativeDaoFee: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type TradingPairStat @entity {
+  id: ID!
+  indexToken: Bytes!
+  volumeUsd: BigInt!
+  volume: BigInt!
+  longOpenInterest: BigDecimal!
+  shortOpenInterest: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+# Risk factor
+
+type RiskFactor @entity {
+  id: ID!
+  token: Bytes!
+  totalRiskFactor: BigInt!
+  riskFactors: [BigInt!]!
+}
+
+# Price
+type PriceStat @entity {
+  id: ID!
+  token: Bytes!
+  value: BigInt!
+  period: Period!
+  timestamp: Int!
+}
+
+# Staking
+
+type DaoStaking @entity {
+  id: ID!
+  stake: BigDecimal!
+  unStake: BigDecimal!
+  cumulative: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type LgoStaking @entity {
+  id: ID!
+  stake: BigDecimal!
+  unStake: BigDecimal!
+  cumulative: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type LvlStaking @entity {
+  id: ID!
+  stake: BigDecimal!
+  unStake: BigDecimal!
+  cumulative: BigDecimal!
+  period: Period!
+  timestamp: Int!
+}
+
+type Token @entity {
+  id: ID!
+  address: Bytes!
+  decimals: Int!
+}

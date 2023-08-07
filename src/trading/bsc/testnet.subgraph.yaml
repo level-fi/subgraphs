@@ -1,0 +1,160 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: OrderManager
+    source:
+      abi: OrderManager
+      address: "0x392d828eEE93d01E164E4AE6977a8a5Ef8923214"
+      startBlock: 27629460
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Market
+        - Token
+        - Order
+        - User
+      abis:
+        - name: Pool
+          file: ./abis/Pool.json
+        - name: OrderManager
+          file: ./abis/OrderManager.json
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: OrderPlaced(indexed
+            uint256,(address,address,address,address,address,uint256,uint256,uint256,uint256,bool),(uint8,uint256,uint256,uint8))
+          handler: handleOrderPlaced
+        - event: OrderCancelled(indexed uint256)
+          handler: handleOrderCancelled
+        - event: OrderExpired(indexed uint256)
+          handler: handleOrderExpired
+        - event: OrderExecuted(indexed
+            uint256,(address,address,address,address,address,uint256,uint256,uint256,uint256,bool),(uint8,uint256,uint256,uint8),uint256)
+          handler: handleOrderExecuted
+        - event: SwapOrderPlaced(indexed uint256)
+          handler: handleSwapOrderPlaced
+        - event: SwapOrderCancelled(indexed uint256)
+          handler: handleSwapOrderCancelled
+        - event: SwapOrderExecuted(indexed uint256,uint256,uint256)
+          handler: handleSwapOrderExecuted
+          receipt: true
+        - event: Swap(indexed address,indexed address,indexed
+            address,address,uint256,uint256)
+          handler: handleSwap
+          receipt: true
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: OracleChanged(address)
+          handler: handleOracleChanged
+      file: ./mappings/ordermanager.ts
+    network: chapel
+  - kind: ethereum
+    name: Pool
+    source:
+      abi: Pool
+      address: "0x339e42dFd61f4f4D1Be5D6D4b422FC571eC948DD"
+      startBlock: 27629460
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/pool.ts
+      entities:
+        - Market
+        - Token
+        - User
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Pool
+          file: ./abis/Pool.json
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: TokenWhitelisted(address)
+          handler: handleTokenWhitelisted
+        - event: TokenWhitelisted(indexed address)
+          handler: handleTokenWhitelisted
+        - event: IncreasePosition(bytes32,address,address,address,uint256,uint256,uint8,uint256,uint256)
+          handler: handleIncreasePosition
+        - event: IncreasePosition(indexed bytes32,address,address,address,uint256,uint256,uint8,uint256,uint256)
+          handler: handleIncreasePosition
+        - event: DecreasePosition(bytes32,address,address,address,uint256,uint256,uint8,uint256,(uint256,uint256),uint256)
+          handler: handleDecreasePosition
+        - event: DecreasePosition(indexed bytes32,address,address,address,uint256,uint256,uint8,uint256,(uint256,uint256),uint256)
+          handler: handleDecreasePosition
+        - event: UpdatePosition(bytes32,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleUpdatePosition
+        - event: UpdatePosition(indexed bytes32,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleUpdatePosition
+        - event: ClosePosition(bytes32,uint256,uint256,uint256,uint256,uint256)
+          handler: handleClosePosition
+        - event: ClosePosition(indexed bytes32,uint256,uint256,uint256,uint256,uint256)
+          handler: handleClosePosition
+        - event: LiquidatePosition(bytes32,address,address,address,uint8,uint256,uint256,uint256,uint256,(uint256,uint256),uint256)
+          handler: handleLiquidatePosition
+        - event: LiquidatePosition(indexed bytes32,address,address,address,uint8,uint256,uint256,uint256,uint256,(uint256,uint256),uint256)
+          handler: handleLiquidatePosition
+        - event: Swap(address,address,address,uint256,uint256,uint256)
+          handler: handleSwap
+        - event: Swap(indexed address,address,address,uint256,uint256,uint256)
+          handler: handleSwap
+    network: chapel
+  - kind: ethereum
+    name: LyLevel
+    source:
+      abi: LyLevel
+      address: "0xa70271AF28FD14AB2B8534c8a9297588b45ffcf4"
+      startBlock: 27631788
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/lylevel.ts
+      entities:
+        - LoyaltyHistory
+        - LoyaltyProgram
+        - LoyaltyProtocol
+      abis:
+        - name: LyLevel
+          file: ./abis/LyLevel.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleMint
+          receipt: true
+        - event: Claimed(indexed address,indexed uint256,uint256,address)
+          handler: handleClaimed
+        - event: BatchStarted(uint256)
+          handler: handleBatchStarted
+        - event: RewardAllocated(indexed uint256,uint256)
+          handler: handleRewardAllocated
+        - event: BatchVestingDurationSet(uint256)
+          handler: handleBatchVestingDurationSet
+        - event: RewardAdded(uint256,uint256,address)
+          handler: handleRewardAdded
+    network: chapel
+templates:
+  - kind: ethereum/contract
+    name: Oracle
+    source:
+      abi: Oracle
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PriceStat
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: PricePosted(indexed address,uint256)
+          handler: handlePricePost
+      file: ./mappings/oracle.ts
+    network: chapel

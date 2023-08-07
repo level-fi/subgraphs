@@ -111,6 +111,25 @@
         "type": "uint256"
       }
     ],
+    "name": "EpochStarted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_epoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_timeStart",
+        "type": "uint256"
+      }
+    ],
     "name": "EpochStartedV2",
     "type": "event"
   },

@@ -1,6 +1,11 @@
-import { BigInt, BigDecimal, Address, dataSource } from "@graphprotocol/graph-ts";
+import {
+  BigInt,
+  BigDecimal,
+  Address,
+  dataSource,
+} from "@graphprotocol/graph-ts";
 
-export const isTestnet = dataSource.network().includes("testnet");
+export const network = dataSource.network();
 
 export const ZERO = BigInt.zero();
 

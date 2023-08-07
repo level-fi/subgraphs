@@ -1,0 +1,60 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: LevelReferralRegistry
+    source:
+      abi: LevelReferralRegistry
+      address: "0x4980c82cf6a4bf0a3265985d4bc01120a0c6bb22"
+      startBlock: 24890309
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/referral.ts
+      entities:
+        - ReferralRegistry
+        - ClaimRegistry
+        - CrawlIndex
+        - Verify
+      abis:
+        - name: LevelReferralRegistry
+          file: ./abis/LevelReferralRegistry.json
+      eventHandlers:
+        - event: ReferrerSet(indexed address,indexed address)
+          handler: handleReferrerSet
+        - event: SetChainToClaimRewards(indexed address)
+          handler: handleSetChainToClaimRewards
+        - event: UserVerified(indexed address)
+          handler: handleUserVerified
+        - event: UserUnverified(indexed address)
+          handler: handleUserUnverified
+    network: bsc
+  - kind: ethereum
+    name: LevelReferralController
+    source:
+      abi: LevelReferralController
+      address: "0x5e60606Dc9FcAa6891F63c9288E4BF0bB016D79c"
+      startBlock: 29552177
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/referral.ts
+      entities:
+        - FeeHistory
+        - Epoch
+        - CrawlIndex
+      abis:
+        - name: LevelReferralController
+          file: ./abis/LevelReferralController.json
+      eventHandlers:
+        - event: TradingFeeUpdated(indexed uint256,indexed address,uint256)
+          handler: handleTradingFeeUpdated
+        - event: EpochStarted(indexed uint256,uint64)
+          handler: handleEpochStarted
+        - event: EpochEnded(indexed uint256)
+          handler: handleEpochEnded
+          receipt: true
+    network: bsc

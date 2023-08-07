@@ -4,6 +4,7 @@ import {
   Allocated,
   Allocated1,
   EpochStarted,
+  EpochStarted1,
   EpochStartedV2
 } from "../generated/TradingIncentiveController/TradingIncentiveController";
 import { ZERO } from "../../config/constant";
@@ -23,6 +24,18 @@ export function handleEpochStarted(event: EpochStarted): void {
   const epochInfo = loadOrCreateEpoch(epochKey);
   epochInfo.blockNumber = event.block.number;
   epochInfo.createdAt = event.block.timestamp;
+  epochInfo.epoch = event.params._epoch;
+  epochInfo.epochFee = ZERO;
+  epochInfo.contestReward = ZERO;
+  epochInfo.loyaltyReward = ZERO;
+  epochInfo.save();
+}
+
+export function handleEpochStarted1(event: EpochStarted1): void {
+  const epochKey = `${event.params._epoch}`;
+  const epochInfo = loadOrCreateEpoch(epochKey);
+  epochInfo.blockNumber = event.block.number;
+  epochInfo.createdAt = event.params._timeStart;
   epochInfo.epoch = event.params._epoch;
   epochInfo.epochFee = ZERO;
   epochInfo.contestReward = ZERO;

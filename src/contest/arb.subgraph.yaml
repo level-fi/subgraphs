@@ -1,0 +1,62 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: TradingContest
+    network: arbitrum-one
+    source:
+      address: "0x8d7f3359d3d3d0f37a988b89a5824885ed8c52a4"
+      abi: TradingContest
+      startBlock: 101681637
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - RecordAdded
+      abis:
+        - name: TradingContest
+          file: ./abis/TradingContest.json
+      eventHandlers:
+        - event: RecordAdded(address,uint256,uint256,uint256,uint256,uint64)
+          handler: handleRecordAdded
+        - event: BatchStarted(uint64)
+          handler: handleBatchStarted
+        - event: BatchEnded(uint64)
+          handler: handleBatchEnded
+        - event: Finalized(uint64)
+          handler: handleBatchFinalized
+        - event: LeaderUpdated(uint64)
+          handler: handleLeaderUpdated
+      file: ./mappings/contest.ts
+
+  - kind: ethereum
+    name: TradingIncentiveController
+    network: arbitrum-one
+    source:
+      address: "0x084292f911c94d00aa4deda08fa7bbb13b29b5ba"
+      abi: TradingIncentiveController
+      startBlock: 101712491
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Allocated
+      abis:
+        - name: TradingIncentiveController
+          file: ./abis/TradingIncentiveController.json
+      eventHandlers:
+        - event: Allocated(uint256,uint256,uint256)
+          handler: handleEpochAllocated
+        - event: Allocated(uint256,uint256,uint256,uint256)
+          handler: handleEpochAllocatedV2
+        - event: EpochStarted(uint256)
+          handler: handleEpochStarted
+        - event: EpochStarted(uint256,uint256)
+          handler: handleEpochStarted1
+        - event: EpochStartedV2(uint256,uint256)
+          handler: handleEpochStartedV2
+
+      file: ./mappings/incentive-controller.ts
