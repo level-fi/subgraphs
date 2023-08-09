@@ -1,0 +1,55 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: LevelReferralRegistry
+    source:
+      abi: LevelReferralRegistry
+      address: "0xed0780210a099271fae2ba93e1dd2310936761be"
+      startBlock: 107156485
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/referral.ts
+      entities:
+        - ReferralRegistry
+        - ClaimRegistry
+        - CrawlIndex
+      abis:
+        - name: LevelReferralRegistry
+          file: ./abis/LevelReferralRegistry.json
+      eventHandlers:
+        - event: ReferrerSet(indexed address,indexed address)
+          handler: handleReferrerSet
+        - event: SetChainToClaimRewards(indexed address)
+          handler: handleSetChainToClaimRewards
+    network: arbitrum-one
+  - kind: ethereum
+    name: LevelReferralController
+    source:
+      abi: LevelReferralController
+      address: "0xbf80a1288012ada64b6086998fa12bb482086bbc"
+      startBlock: 107156552
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/referral.ts
+      entities:
+        - FeeHistory
+        - Epoch
+        - CrawlIndex
+      abis:
+        - name: LevelReferralController
+          file: ./abis/LevelReferralController.json
+      eventHandlers:
+        - event: TradingFeeUpdated(indexed uint256,indexed address,uint256)
+          handler: handleTradingFeeUpdated
+        - event: EpochStarted(indexed uint256,uint64)
+          handler: handleEpochStarted
+        - event: EpochEnded(indexed uint256)
+          handler: handleEpochEnded
+          receipt: true
+    network: arbitrum-one

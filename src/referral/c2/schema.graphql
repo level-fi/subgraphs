@@ -1,0 +1,38 @@
+type ReferralRegistry @entity {
+  id: ID!
+  index: BigInt!
+  user: Bytes!
+  referrer: Bytes!
+  time: BigInt!
+}
+
+type ClaimRegistry @entity {
+  id: ID!
+  index: BigInt!
+  user: Bytes!
+  time: BigInt!
+}
+
+type FeeHistory @entity {
+  id: ID!
+  index: BigInt!
+  trader: Bytes!
+  feeValue: BigInt!
+  epochId: Int!
+  time: BigInt!
+}
+
+type Epoch @entity {
+  id: ID!
+  epochId: Int!
+  startTime: BigInt!
+  endTime: BigInt
+  endBlock: BigInt
+}
+
+type CrawlIndex @entity {
+  id: ID!
+  referralRegistryIndex: BigInt!
+  claimRegistryIndex: BigInt!
+  feeHistoryIndex: BigInt!
+}

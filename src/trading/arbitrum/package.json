@@ -1,0 +1,11 @@
+{
+    "name": "trading-arbitrum",
+    "version": "1.0.0",
+    "license": "MIT",
+    "scripts": {
+        "codegen": "graph codegen",
+        "build": "graph build",
+        "graph": "graph",
+        "clean": "rm -Rf build generated"
+    }
+}

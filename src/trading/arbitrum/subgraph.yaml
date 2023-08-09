@@ -1,0 +1,143 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: OrderManager
+    source:
+      abi: OrderManager
+      address: "0x2215298606C9D0274527b13519Ec50c3A7f1c1eF"
+      startBlock: 99334388
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Market
+        - Token
+        - Order
+        - User
+      abis:
+        - name: Pool
+          file: ./abis/Pool.json
+        - name: OrderManager
+          file: ./abis/OrderManager.json
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: LeverageOrderPlaced(indexed uint256,(address,address,address,uint8,bool,address,uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint8,uint8))
+          handler: handleOrderPlaced
+        - event: LeverageOrderCancelled(indexed uint256)
+          handler: handleOrderCancelled
+        - event: LeverageOrderExpired(indexed uint256)
+          handler: handleOrderExpired
+        - event: LeverageOrderExecuted(indexed uint256,(address,address,address,uint8,bool,address,uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint8,uint8),uint256)
+          handler: handleOrderExecuted
+        - event: SwapOrderPlaced(indexed uint256,(address,address,address,uint8,uint256,uint256,uint256,uint256,uint256,uint256))
+          handler: handleSwapOrderPlaced
+        - event: SwapOrderCancelled(indexed uint256)
+          handler: handleSwapOrderCancelled
+        - event: SwapOrderExecuted(indexed uint256,uint256,uint256)
+          handler: handleSwapOrderExecuted
+          receipt: true
+        - event: Swap(indexed address,indexed address,indexed address,address,uint256,uint256)
+          handler: handleSwap
+          receipt: true
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: OracleChanged(address)
+          handler: handleOracleChanged
+      file: ./mappings/ordermanager.ts
+    network: arbitrum-one
+  - kind: ethereum
+    name: Pool
+    source:
+      abi: Pool
+      address: "0x32B7bF19cb8b95C27E644183837813d4b595dcc6"
+      startBlock: 99333260
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/pool.ts
+      entities:
+        - Market
+        - Token
+        - User
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Pool
+          file: ./abis/Pool.json
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: TokenWhitelisted(indexed address)
+          handler: handleTokenWhitelisted
+        - event: IncreasePosition(indexed bytes32,address,address,address,uint256,uint256,uint8,uint256,uint256)
+          handler: handleIncreasePosition
+        - event: DecreasePosition(indexed bytes32,address,address,address,uint256,uint256,uint8,uint256,int256,uint256)
+          handler: handleDecreasePosition
+        - event: UpdatePosition(indexed bytes32,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleUpdatePosition
+        - event: ClosePosition(indexed bytes32,uint256,uint256,uint256,uint256,uint256)
+          handler: handleClosePosition
+        - event: LiquidatePosition(indexed bytes32,address,address,address,uint8,uint256,uint256,uint256,uint256,int256,uint256)
+          handler: handleLiquidatePosition
+        - event: Swap(indexed address,address,address,uint256,uint256,uint256,uint256,uint256)
+          handler: handleSwap
+    network: arbitrum-one
+  - kind: ethereum
+    name: LyLevel
+    source:
+      abi: LyLevel
+      address: "0x1428cc68c38f370c911a537981b75b0e3c650c33"
+      startBlock: 101677381
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./mappings/lylevel.ts
+      entities:
+        - LoyaltyHistory
+        - LoyaltyProgram
+        - LoyaltyProtocol
+      abis:
+        - name: LyLevel
+          file: ./abis/LyLevel.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleMint
+          receipt: true
+        - event: Claimed(indexed address,indexed uint256,uint256,address)
+          handler: handleClaimed
+        - event: BatchStarted(uint256)
+          handler: handleBatchStarted
+        - event: RewardAllocated(indexed uint256,uint256)
+          handler: handleRewardAllocated
+        - event: BatchVestingDurationSet(uint256)
+          handler: handleBatchVestingDurationSet
+        - event: RewardAdded(uint256,uint256,address)
+          handler: handleRewardAdded
+    network: arbitrum-one
+templates:
+  - kind: ethereum/contract
+    name: Oracle
+    source:
+      abi: Oracle
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PriceStat
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: PricePosted(indexed address,uint256)
+          handler: handlePricePost
+      file: ./mappings/oracle.ts
+    network: arbitrum-one

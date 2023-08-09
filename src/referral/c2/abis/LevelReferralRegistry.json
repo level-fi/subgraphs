@@ -1,0 +1,34 @@
+[
+  {
+    "anonymous":false,
+    "inputs":[
+      {
+        "indexed":true,
+        "internalType":"address",
+        "name":"trader",
+        "type":"address"
+      },
+      {
+        "indexed":true,
+        "internalType":"address",
+        "name":"referrer",
+        "type":"address"
+      }
+    ],
+    "name":"ReferrerSet",
+    "type":"event"
+  },
+  {
+    "anonymous":false,
+    "inputs":[
+      {
+        "indexed":true,
+        "internalType":"address",
+        "name":"user",
+        "type":"address"
+      }
+    ],
+    "name":"SetChainToClaimRewards",
+    "type":"event"
+  }
+]
